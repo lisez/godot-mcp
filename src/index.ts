@@ -20,20 +20,20 @@ import {
   McpError,
 } from '@modelcontextprotocol/sdk/types.js';
 
-import * as launch_editor from './tools/launch_editor.ts';
-import * as run_project from './tools/run_project.ts';
-import * as get_debug_output from './tools/get_debug_output.ts';
-import * as stop_project from './tools/stop_project.ts';
-import * as get_godot_version from './tools/get_godot_version.ts';
-import * as list_projects from './tools/list_projects.ts';
-import * as get_project_info from './tools/get_project_info.ts';
-import * as create_scene from './tools/create_scene.ts';
-import * as add_node from './tools/add_node.ts';
-import * as load_sprite from './tools/load_sprite.ts';
-import * as export_mesh_library from './tools/export_mesh_library.ts';
-import * as save_scene from './tools/save_scene.ts';
-import * as get_uid from './tools/get_uid.ts';
-import * as update_project_uids from './tools/update_project_uids.ts';
+import * as launch_editor from './tools/launch-editor.ts';
+import * as run_project from './tools/run-project.ts';
+import * as get_debug_output from './tools/get-debug-output.ts';
+import * as stop_project from './tools/stop-project.ts';
+import * as get_godot_version from './tools/get-godot-version.ts';
+import * as list_projects from './tools/list-projects.ts';
+import * as get_project_info from './tools/get-project-info.ts';
+import * as create_scene from './tools/create-scene.ts';
+import * as add_node from './tools/add-node.ts';
+import * as load_sprite from './tools/load-sprite.ts';
+import * as export_mesh_library from './tools/export-mesh-library.ts';
+import * as save_scene from './tools/save-scene.ts';
+import * as get_uid from './tools/get-uid.ts';
+import * as update_project_uids from './tools/update-project-uids.ts';
 
 // Check if debug mode is enabled
 const DEBUG_MODE: boolean = process.env.DEBUG === 'true';
@@ -139,7 +139,7 @@ export class GodotServer {
     }
 
     // Set the path to the operations script
-    this.operationsScriptPath = join(import.meta.dirname, 'scripts', 'godot_operations.gd');
+    this.operationsScriptPath = join(import.meta.dirname, 'scripts', 'godot-operations.gd');
     if (debugMode) console.error(`[DEBUG] Operations script path: ${this.operationsScriptPath}`);
 
     // Initialize the MCP server

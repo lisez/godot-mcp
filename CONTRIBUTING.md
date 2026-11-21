@@ -47,8 +47,10 @@ By participating in this project, you agree to maintain a respectful and inclusi
 ```
 godot-mcp/
 ├── src/             # Source code
-│   └── index.ts     # Main server implementation
-├── tests/           # Test files
+│   ├── index.ts     # Main server implementation
+│   ├── index.test.mjs # Side-by-side server tests
+│   ├── tools/       # Individual MCP tools
+│   └── scripts/     # GDScript helpers
 ├── examples/        # Example Godot projects (future)
 ├── LICENSE          # MIT License
 ├── README.md        # Documentation

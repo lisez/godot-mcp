@@ -104,7 +104,7 @@ npm test
 npm run typecheck
 ```
 
-The project is implemented in TypeScript under `src/`. Complex scene and resource operations are handled by `src/scripts/godot_operations.gd`.
+The project is implemented in TypeScript under `src/`. Complex scene and resource operations are handled by `src/scripts/godot-operations.gd`.
 
 ## Troubleshooting
 

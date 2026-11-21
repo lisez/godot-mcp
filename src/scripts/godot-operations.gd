@@ -22,7 +22,7 @@ func _init():
     var params_index = script_index + 3
     
     if args.size() <= params_index:
-        log_error("Usage: godot --headless --script godot_operations.gd <operation> <json_params>")
+        log_error("Usage: godot --headless --script godot-operations.gd <operation> <json_params>")
         log_error("Not enough command-line arguments provided.")
         quit(1)
     
