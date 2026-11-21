@@ -81,7 +81,7 @@ Godot MCP enables AI agents to launch the Godot editor, run projects, capture de
 ## Requirements
 
 - [Godot Engine](https://godotengine.org/download) installed on your system
-- Node.js (>=18.0.0) and npm
+- Node.js (>=26.0.0) and npm
 - An AI agent that supports MCP
 
 ## Quick Start
