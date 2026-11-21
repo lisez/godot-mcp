@@ -30,34 +30,24 @@ Godot MCP is a [Model Context Protocol](https://modelcontextprotocol.io/introduc
 
 ## Set up
 
-Clone the repository and install its dependencies:
-
-```bash
-git clone https://github.com/lisez/godot-mcp.git
-cd godot-mcp
-npm ci
-```
-
-The server runs the TypeScript source directly with Node.js; no build step is needed.
+Run the server with `npx`; no repository clone or global install is needed. The first run downloads the package directly from GitHub:
 
 ### Claude Code
 
-Register the server with Claude Code, replacing the example path with the absolute path to your checkout:
-
 ```bash
-claude mcp add godot -- node /path/to/godot-mcp/src/index.ts
+claude mcp add godot -- npx -y github:lisez/godot-mcp
 ```
 
 ### Other MCP clients
 
-Use this server configuration in your MCP client's settings, replacing the example paths:
+Add this server configuration to your MCP client's settings:
 
 ```json
 {
   "mcpServers": {
     "godot": {
-      "command": "node",
-      "args": ["/path/to/godot-mcp/src/index.ts"],
+      "command": "npx",
+      "args": ["-y", "github:lisez/godot-mcp"],
       "env": {
         "GODOT_PATH": "/path/to/godot"
       }
@@ -96,7 +86,15 @@ Use this server configuration in your MCP client's settings, replacing the examp
 
 ## Development
 
-From the repository root:
+To run from a local checkout, clone the repository and install its dependencies:
+
+```bash
+git clone https://github.com/lisez/godot-mcp.git
+cd godot-mcp
+npm ci
+```
+
+The server runs compiled JavaScript. `npm ci` builds it automatically; after making changes, run `npm run build` to rebuild it. From the repository root, run:
 
 ```bash
 npm test
@@ -109,7 +107,7 @@ The project is implemented in TypeScript under `src/`. Complex scene and resourc
 
 - **Godot is not found:** Set `GODOT_PATH` to the Godot executable and restart your MCP client.
 - **A project cannot be opened:** Check that the supplied path points to a Godot project directory containing `project.godot`.
-- **MCP tools are unavailable:** Confirm the server configuration points to your checkout's `src/index.ts`, dependencies are installed, and restart or refresh the client.
+- **MCP tools are unavailable:** Confirm the server configuration runs `npx -y github:lisez/godot-mcp`, Node.js 26 or later is available, and restart or refresh the client.
 
 ## License
 

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import { test } from 'node:test';
@@ -9,10 +9,14 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 
 const serverPath = join(process.cwd(), 'src', 'index.ts');
 
-async function withServer(callback, godotPath = process.execPath) {
+async function withServer<T>(
+  callback: (client: Client) => Promise<T>,
+  godotPath = process.execPath,
+  entryPath = serverPath
+) {
   const transport = new StdioClientTransport({
     command: process.execPath,
-    args: [serverPath],
+    args: [entryPath],
     env: {
       ...process.env,
       GODOT_PATH: godotPath,
@@ -32,16 +36,22 @@ async function withServer(callback, godotPath = process.execPath) {
   }
 }
 
-async function getProjectInfo(projectPath) {
+function firstText(result: Awaited<ReturnType<Client['callTool']>>): string {
+  assert.ok(Array.isArray(result.content));
+  const content = result.content[0];
+  assert.equal(content?.type, 'text');
+  assert.equal(typeof content.text, 'string');
+  return content.text;
+}
+
+async function getProjectInfo(projectPath: string) {
   return withServer(async (client) => {
     const result = await client.callTool({
       name: 'get_project_info',
       arguments: { projectPath },
     });
     assert.notEqual(result.isError, true);
-    assert.ok(Array.isArray(result.content));
-    assert.equal(result.content[0]?.type, 'text');
-    return JSON.parse(result.content[0].text);
+    return JSON.parse(firstText(result));
   });
 }
 
@@ -91,7 +101,7 @@ test('all tools are registered and routed to their handlers', async () => {
     for (const name of toolNames) {
       const result = await client.callTool({ name, arguments: {} });
       assert.equal(result.isError === true, name !== 'get_godot_version', name);
-      assert.equal(result.content[0]?.type, 'text', name);
+      firstText(result);
     }
     await assert.rejects(
       client.callTool({ name: 'unknown_tool', arguments: {} }),
@@ -104,7 +114,12 @@ test('tool modules share process state and use the bundled operations script', {
   skip: process.platform === 'win32',
 }, async () => {
   const root = await mkdtemp(join(tmpdir(), 'godot-mcp-tools-'));
+  const packageRoot = await mkdtemp(join(process.cwd(), 'node_modules', 'godot-mcp-test-'));
   try {
+    const manifest = JSON.parse(await readFile('package.json', 'utf8'));
+    await cp('package.json', join(packageRoot, 'package.json'));
+    await cp('dist', join(packageRoot, 'dist'), { recursive: true });
+    const packagedServerPath = join(packageRoot, manifest.bin['godot-mcp']);
     const godotPath = join(root, 'godot.mjs');
     await writeFile(godotPath, `#!${process.execPath}
 import { existsSync } from 'node:fs';
@@ -126,8 +141,8 @@ if (args.includes('--version')) {
         arguments: { project_path: root, scene_path: 'test.tscn' },
       });
       assert.notEqual(created.isError, true);
-      const args = JSON.parse(created.content[0].text.split('\n\nOutput: ')[1]);
-      assert.equal(args[args.indexOf('--script') + 1], join(process.cwd(), 'src', 'scripts', 'godot-operations.gd'));
+      const args = JSON.parse(firstText(created).split('\n\nOutput: ')[1]);
+      assert.equal(args[args.indexOf('--script') + 1], join(packageRoot, 'dist', 'scripts', 'godot-operations.gd'));
       assert.equal(args[args.indexOf('--script') + 2], 'create_scene');
       assert.deepEqual(JSON.parse(args[args.indexOf('--script') + 3]), {
         scene_path: 'test.tscn',
@@ -140,11 +155,12 @@ if (args.includes('--version')) {
       assert.notEqual(output.isError, true);
       const stopped = await client.callTool({ name: 'stop_project', arguments: {} });
       assert.notEqual(stopped.isError, true);
-      assert.equal(JSON.parse(stopped.content[0].text).message, 'Godot project stopped');
+      assert.equal(JSON.parse(firstText(stopped)).message, 'Godot project stopped');
       const afterStop = await client.callTool({ name: 'get_debug_output', arguments: {} });
       assert.equal(afterStop.isError, true);
-    }, godotPath);
+    }, godotPath, packagedServerPath);
   } finally {
     await rm(root, { recursive: true, force: true });
+    await rm(packageRoot, { recursive: true, force: true });
   }
 });
