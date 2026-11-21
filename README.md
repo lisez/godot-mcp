@@ -208,10 +208,10 @@ For any MCP-compatible client, use this configuration:
 git clone https://github.com/Coding-Solo/godot-mcp.git
 cd godot-mcp
 npm install
-npm run build
 ```
 
-Then point your MCP client to `build/index.js` instead of using `npx`.
+Node.js 26 runs the TypeScript source directly, so no build step is needed. Point
+your MCP client to `src/index.ts` instead of using `npx`.
 
 </details>
 

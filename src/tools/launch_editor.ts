@@ -2,7 +2,7 @@ import { join } from 'node:path';
 import { existsSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
-import type { GodotServer } from '../index.js';
+import type { GodotServer } from '../index.ts';
 
 export const definition: Tool = {
   name: 'launch_editor',

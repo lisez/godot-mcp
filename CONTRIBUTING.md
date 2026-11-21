@@ -39,8 +39,8 @@ By participating in this project, you agree to maintain a respectful and inclusi
 
 1. Clone the repository
 2. Install dependencies with `npm install`
-3. Build the project with `npm run build`
-4. For development with auto-rebuild, use `npm run watch`
+3. Run tests with `npm test`
+4. Check types with `npm run typecheck`
 
 ### Project Structure
 
@@ -48,8 +48,7 @@ By participating in this project, you agree to maintain a respectful and inclusi
 godot-mcp/
 ├── src/             # Source code
 │   └── index.ts     # Main server implementation
-├── build/           # Compiled JavaScript (generated)
-├── tests/           # Test files (future)
+├── tests/           # Test files
 ├── examples/        # Example Godot projects (future)
 ├── LICENSE          # MIT License
 ├── README.md        # Documentation

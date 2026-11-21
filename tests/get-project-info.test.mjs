@@ -7,7 +7,7 @@ import { test } from 'node:test';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 
-const serverPath = join(process.cwd(), 'build', 'index.js');
+const serverPath = join(process.cwd(), 'src', 'index.ts');
 
 async function withServer(callback, godotPath = process.execPath) {
   const transport = new StdioClientTransport({
@@ -127,7 +127,7 @@ if (args.includes('--version')) {
       });
       assert.notEqual(created.isError, true);
       const args = JSON.parse(created.content[0].text.split('\n\nOutput: ')[1]);
-      assert.equal(args[args.indexOf('--script') + 1], join(process.cwd(), 'build', 'scripts', 'godot_operations.gd'));
+      assert.equal(args[args.indexOf('--script') + 1], join(process.cwd(), 'src', 'scripts', 'godot_operations.gd'));
       assert.equal(args[args.indexOf('--script') + 2], 'create_scene');
       assert.deepEqual(JSON.parse(args[args.indexOf('--script') + 3]), {
         scene_path: 'test.tscn',

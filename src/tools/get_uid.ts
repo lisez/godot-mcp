@@ -1,8 +1,8 @@
 import { join } from 'node:path';
 import { existsSync } from 'node:fs';
-import { execFileAsync } from '../process.js';
+import { execFileAsync } from '../process.ts';
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
-import type { GodotServer } from '../index.js';
+import type { GodotServer } from '../index.ts';
 
 export const definition: Tool = {
   name: 'get_uid',
