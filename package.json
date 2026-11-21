@@ -28,13 +28,13 @@
   ],
   "scripts": {
     "build": "tsc && node scripts/build.js",
+    "test": "npm run build && node --test tests/get-project-info.test.mjs",
     "inspector": "npx @modelcontextprotocol/inspector build/index.js",
     "prepare": "npm run build",
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "0.6.0",
-    "axios": "^1.7.9",
+    "@modelcontextprotocol/sdk": "1.32.2",
     "fs-extra": "^11.2.0"
   },
   "devDependencies": {
