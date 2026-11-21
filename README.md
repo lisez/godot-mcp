@@ -1,246 +1,117 @@
 # Godot MCP
 
-[![Github-sponsors](https://img.shields.io/badge/sponsor-30363D?style=for-the-badge&logo=GitHub-Sponsors&logoColor=#EA4AAA)](https://github.com/sponsors/Coding-Solo)
-
-[![](https://badge.mcpx.dev?type=server 'MCP Server')](https://modelcontextprotocol.io/introduction)
+[![GitHub Sponsors](https://img.shields.io/badge/sponsor-30363D?style=for-the-badge&logo=GitHub-Sponsors&logoColor=%23EA4AAA)](https://github.com/sponsors/lisez)
+[![MCP Server](https://badge.mcpx.dev?type=server)](https://modelcontextprotocol.io/introduction)
 [![Made with Godot](https://img.shields.io/badge/Made%20with-Godot-478CBF?style=flat&logo=godot%20engine&logoColor=white)](https://godotengine.org)
-[![](https://img.shields.io/badge/Node.js-339933?style=flat&logo=nodedotjs&logoColor=white 'Node.js')](https://nodejs.org/en/download/)
-[![](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white 'TypeScript')](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-[![](https://img.shields.io/github/last-commit/Coding-Solo/godot-mcp 'Last Commit')](https://github.com/Coding-Solo/godot-mcp/commits/main)
-[![](https://img.shields.io/github/stars/Coding-Solo/godot-mcp 'Stars')](https://github.com/Coding-Solo/godot-mcp/stargazers)
-[![](https://img.shields.io/github/forks/Coding-Solo/godot-mcp 'Forks')](https://github.com/Coding-Solo/godot-mcp/network/members)
-[![](https://img.shields.io/badge/License-MIT-red.svg 'MIT License')](https://opensource.org/licenses/MIT)
+[![Last commit](https://img.shields.io/github/last-commit/lisez/godot-mcp)](https://github.com/lisez/godot-mcp/commits/main)
+[![Stars](https://img.shields.io/github/stars/lisez/godot-mcp)](https://github.com/lisez/godot-mcp/stargazers)
+[![Forks](https://img.shields.io/github/forks/lisez/godot-mcp)](https://github.com/lisez/godot-mcp/network/members)
+[![License](https://img.shields.io/badge/License-MIT-red.svg)](LICENSE)
 
+Godot MCP is a [Model Context Protocol](https://modelcontextprotocol.io/introduction) server that lets AI assistants inspect and operate Godot projects through the Godot editor and command-line tools.
 
-```text
-                           (((((((             (((((((
-                        (((((((((((           (((((((((((
-                        (((((((((((((       (((((((((((((
-                        (((((((((((((((((((((((((((((((((
-                        (((((((((((((((((((((((((((((((((
-         (((((      (((((((((((((((((((((((((((((((((((((((((      (((((
-       (((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((
-     ((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((
-    ((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((
-      (((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((
-        (((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((
-         (((((((((((@@@@@@@(((((((((((((((((((((((((((@@@@@@@(((((((((((
-         (((((((((@@@@,,,,,@@@(((((((((((((((((((((@@@,,,,,@@@@(((((((((
-         ((((((((@@@,,,,,,,,,@@(((((((@@@@@(((((((@@,,,,,,,,,@@@((((((((
-         ((((((((@@@,,,,,,,,,@@(((((((@@@@@(((((((@@,,,,,,,,,@@@((((((((
-         (((((((((@@@,,,,,,,@@((((((((@@@@@((((((((@@,,,,,,,@@@(((((((((
-         ((((((((((((@@@@@@(((((((((((@@@@@(((((((((((@@@@@@((((((((((((
-         (((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((
-         (((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((
-         @@@@@@@@@@@@@((((((((((((@@@@@@@@@@@@@((((((((((((@@@@@@@@@@@@@
-         ((((((((( @@@(((((((((((@@(((((((((((@@(((((((((((@@@ (((((((((
-         (((((((((( @@((((((((((@@@(((((((((((@@@((((((((((@@ ((((((((((
-          (((((((((((@@@@@@@@@@@@@@(((((((((((@@@@@@@@@@@@@@(((((((((((
-           (((((((((((((((((((((((((((((((((((((((((((((((((((((((((((
-              (((((((((((((((((((((((((((((((((((((((((((((((((((((
-                 (((((((((((((((((((((((((((((((((((((((((((((((
-                        (((((((((((((((((((((((((((((((((
-
-
-                          /$$      /$$  /$$$$$$  /$$$$$$$
-                         | $$$    /$$$ /$$__  $$| $$__  $$
-                         | $$$$  /$$$$| $$  \__/| $$  \ $$
-                         | $$ $$/$$ $$| $$      | $$$$$$$/
-                         | $$  $$$| $$| $$      | $$____/
-                         | $$\  $ | $$| $$    $$| $$
-                         | $$ \/  | $$|  $$$$$$/| $$
-                         |__/     |__/ \______/ |__/
-```
-
-A Model Context Protocol (MCP) server for interacting with the Godot game engine.
-
-## Introduction
-
-Godot MCP enables AI agents to launch the Godot editor, run projects, capture debug output, and control project execution. This direct feedback loop helps agents understand what works and what doesn't in real Godot projects, leading to better code generation and debugging assistance.
+> This repository is forked from [Coding-Solo/godot-mcp](https://github.com/Coding-Solo/godot-mcp).
 
 ## Features
 
-- **Launch Godot Editor**: Open the Godot editor for a specific project
-- **Run Godot Projects**: Execute Godot projects in debug mode
-- **Capture Debug Output**: Retrieve console output and error messages
-- **Control Execution**: Start and stop Godot projects programmatically
-- **Get Godot Version**: Retrieve the installed Godot version
-- **List Godot Projects**: Find Godot projects in a specified directory
-- **Project Analysis**: Get detailed information about project structure
-- **Scene Management**:
-  - Create new scenes with specified root node types
-  - Add nodes to existing scenes with customizable properties
-  - Load sprites and textures into Sprite2D nodes
-  - Export 3D scenes as MeshLibrary resources for GridMap
-  - Save scenes with options for creating variants
-- **UID Management** (for Godot 4.4+):
-  - Get UID for specific files
-  - Update UID references by resaving resources
+- Launch the Godot editor and run or stop projects.
+- Read project debug output and detect the installed Godot version.
+- Find Godot projects and inspect their structure.
+- Create and edit scenes, add nodes, load sprites, save scenes, and export 3D scenes as `MeshLibrary` resources.
+- Read and update resource UIDs (UID operations require Godot 4.4 or later).
 
 ## Requirements
 
-- [Godot Engine](https://godotengine.org/download) installed on your system
-- Node.js (>=26.0.0) and npm
-- An AI agent that supports MCP
+- [Godot Engine](https://godotengine.org/download) installed on your system.
+- Node.js 26 or later and npm.
+- An MCP-compatible client.
 
-## Quick Start
+## Set up
+
+Clone the repository and install its dependencies:
+
+```bash
+git clone https://github.com/lisez/godot-mcp.git
+cd godot-mcp
+npm ci
+```
+
+The server runs the TypeScript source directly with Node.js; no build step is needed.
 
 ### Claude Code
 
-```bash
-claude mcp add godot -- npx @coding-solo/godot-mcp
-```
-
-That's it. Restart Claude Code and your Godot MCP tools are available.
-
-With environment variables:
+Register the server with Claude Code, replacing the example path with the absolute path to your checkout:
 
 ```bash
-claude mcp add godot -e GODOT_PATH=/path/to/godot -e DEBUG=true -- npx @coding-solo/godot-mcp
+claude mcp add godot -- node /path/to/godot-mcp/src/index.ts
 ```
 
-<details>
-<summary><strong>Cline</strong></summary>
+### Other MCP clients
 
-Add to your Cline MCP settings file (`~/Library/Application Support/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json`):
+Use this server configuration in your MCP client's settings, replacing the example paths:
 
 ```json
 {
   "mcpServers": {
     "godot": {
-      "command": "npx",
-      "args": ["@coding-solo/godot-mcp"],
+      "command": "node",
+      "args": ["/path/to/godot-mcp/src/index.ts"],
       "env": {
-        "DEBUG": "true"
-      },
-      "disabled": false,
-      "autoApprove": [
-        "launch_editor",
-        "run_project",
-        "get_debug_output",
-        "stop_project",
-        "get_godot_version",
-        "list_projects",
-        "get_project_info",
-        "create_scene",
-        "add_node",
-        "load_sprite",
-        "export_mesh_library",
-        "save_scene",
-        "get_uid",
-        "update_project_uids"
-      ]
-    }
-  }
-}
-```
-
-</details>
-
-<details>
-<summary><strong>Cursor</strong></summary>
-
-**Using the Cursor UI:**
-
-1. Go to **Cursor Settings** > **Features** > **MCP**
-2. Click on the **+ Add New MCP Server** button
-3. Fill out the form:
-   - Name: `godot`
-   - Type: `command`
-   - Command: `npx @coding-solo/godot-mcp`
-4. Click "Add"
-5. You may need to press the refresh button in the top right corner of the MCP server card to populate the tool list
-
-**Using Project-Specific Configuration:**
-
-Create a file at `.cursor/mcp.json` in your project directory:
-
-```json
-{
-  "mcpServers": {
-    "godot": {
-      "command": "npx",
-      "args": ["@coding-solo/godot-mcp"],
-      "env": {
-        "DEBUG": "true"
+        "GODOT_PATH": "/path/to/godot"
       }
     }
   }
 }
 ```
 
-</details>
+`GODOT_PATH` is optional when Godot can be found automatically. Configure it if Godot is installed in a non-standard location. Use your client's MCP configuration location and format; for example, Cursor supports project-specific settings in `.cursor/mcp.json`.
 
-<details>
-<summary><strong>Other MCP Clients</strong></summary>
+## Available tools
 
-For any MCP-compatible client, use this configuration:
+| Tool | Purpose |
+|------|---------|
+| `launch_editor` | Open a Godot project in the editor |
+| `run_project` | Run a Godot project |
+| `stop_project` | Stop a running project |
+| `get_debug_output` | Read output from a running project |
+| `get_godot_version` | Get the installed Godot version |
+| `list_projects` | Find Godot projects in a directory |
+| `get_project_info` | Inspect a project's structure |
+| `create_scene` | Create a scene |
+| `add_node` | Add a node to a scene |
+| `load_sprite` | Load a sprite or texture into a `Sprite2D` node |
+| `save_scene` | Save a scene, optionally as a variant |
+| `export_mesh_library` | Export a 3D scene as a `MeshLibrary` |
+| `get_uid` | Get a file's Godot UID |
+| `update_project_uids` | Update UIDs in a project |
 
-```json
-{
-  "mcpServers": {
-    "godot": {
-      "command": "npx",
-      "args": ["@coding-solo/godot-mcp"],
-      "env": {
-        "GODOT_PATH": "/path/to/godot",
-        "DEBUG": "true"
-      }
-    }
-  }
-}
-```
-
-</details>
-
-### Environment Variables
+## Configuration
 
 | Variable | Description |
 |----------|-------------|
-| `GODOT_PATH` | Path to the Godot executable (overrides automatic detection) |
-| `DEBUG` | Set to `"true"` to enable detailed server-side debug logging |
+| `GODOT_PATH` | Path to the Godot executable. Set this when Godot is not found automatically. |
+| `DEBUG` | Set to `true` to enable detailed server-side logging. |
 
-<details>
-<summary><strong>Building from Source</strong></summary>
+## Development
+
+From the repository root:
 
 ```bash
-git clone https://github.com/Coding-Solo/godot-mcp.git
-cd godot-mcp
-npm install
+npm test
+npm run typecheck
 ```
 
-Node.js 26 runs the TypeScript source directly, so no build step is needed. Point
-your MCP client to `src/index.ts` instead of using `npx`.
-
-</details>
-
-
-## Architecture
-
-The Godot MCP server uses a bundled GDScript approach for complex operations:
-
-1. **Direct Commands**: Simple operations like launching the editor or getting project info use Godot's built-in CLI commands directly.
-2. **Bundled Operations Script**: Complex operations like creating scenes or adding nodes use a single, comprehensive GDScript file (`godot_operations.gd`) that handles all operations.
-
-The bundled script accepts operation type and parameters as JSON, allowing for flexible and dynamic operation execution without generating temporary files for each operation.
+The project is implemented in TypeScript under `src/`. Complex scene and resource operations are handled by `src/scripts/godot_operations.gd`.
 
 ## Troubleshooting
 
-- **Godot Not Found**: Set the `GODOT_PATH` environment variable to your Godot executable path
-- **Connection Issues**: Ensure the server is running and restart your AI assistant
-- **Invalid Project Path**: Ensure the path points to a directory containing a `project.godot` file
-- **Build Issues**: Make sure all dependencies are installed by running `npm install`
-
-<details>
-<summary><strong>Cursor-Specific Issues</strong></summary>
-
-- Ensure the MCP server shows up and is enabled in Cursor settings (Settings > MCP)
-- MCP tools can only be run using the Agent chat profile (Cursor Pro or Business subscription)
-- Use "Yolo Mode" to automatically run MCP tool requests
-
-</details>
+- **Godot is not found:** Set `GODOT_PATH` to the Godot executable and restart your MCP client.
+- **A project cannot be opened:** Check that the supplied path points to a Godot project directory containing `project.godot`.
+- **MCP tools are unavailable:** Confirm the server configuration points to your checkout's `src/index.ts`, dependencies are installed, and restart or refresh the client.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
