@@ -92,7 +92,7 @@ test('all tools are registered and routed to their handlers', async () => {
     'launch_editor', 'run_project', 'get_debug_output', 'stop_project',
     'get_godot_version', 'list_projects', 'get_project_info', 'create_scene',
     'add_node', 'load_sprite', 'export_mesh_library', 'save_scene', 'get_uid',
-    'update_project_uids',
+    'update_project_uids', 'initialize_project',
   ];
 
   await withServer(async (client) => {
@@ -108,6 +108,57 @@ test('all tools are registered and routed to their handlers', async () => {
       /Unknown tool: unknown_tool/
     );
   });
+});
+
+test('resources expose Godot documentation references', async () => {
+  await withServer(async (client) => {
+    const { resources } = await client.listResources();
+    assert.deepEqual(
+      resources.map((resource) => resource.uri),
+      [
+        'godot://init-project',
+        'godot://references',
+        'godot://references/gdscript',
+        'godot://references/c-sharp',
+        'godot://references/cpp',
+        'godot://references/other-languages',
+        'godot://references/tscn',
+        'godot://references/classes',
+      ]
+    );
+
+    const reference = await client.readResource({ uri: 'godot://references/gdscript' });
+    const content = reference.contents[0];
+    assert.ok(content && 'text' in content);
+    assert.equal(content.text, 'https://docs.godotengine.org/en/latest/tutorials/scripting/gdscript/');
+  });
+});
+
+test('initialize_project creates project.godot without overwriting existing content', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'godot-mcp-init-project-'));
+  try {
+    const projectPath = join(root, 'new-project');
+    await mkdir(projectPath);
+
+    await withServer(async (client) => {
+      const result = await client.callTool({
+        name: 'initialize_project',
+        arguments: { projectPath },
+      });
+      assert.notEqual(result.isError, true);
+      assert.equal(await readFile(join(projectPath, 'project.godot'), 'utf8'), '');
+
+      await writeFile(join(projectPath, 'project.godot'), '[application]\n', 'utf8');
+      const existing = await client.callTool({
+        name: 'initialize_project',
+        arguments: { projectPath },
+      });
+      assert.notEqual(existing.isError, true);
+      assert.equal(await readFile(join(projectPath, 'project.godot'), 'utf8'), '[application]\n');
+    });
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });
 
 test('tool modules share process state and use the bundled operations script', {

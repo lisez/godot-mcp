@@ -16,6 +16,8 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
   CallToolRequestSchema,
   ErrorCode,
+  ListResourcesRequestSchema,
+  ReadResourceRequestSchema,
   ListToolsRequestSchema,
   McpError,
 } from '@modelcontextprotocol/sdk/types.js';
@@ -34,6 +36,8 @@ import * as export_mesh_library from './tools/export-mesh-library.ts';
 import * as save_scene from './tools/save-scene.ts';
 import * as get_uid from './tools/get-uid.ts';
 import * as update_project_uids from './tools/update-project-uids.ts';
+import * as initialize_project from './tools/initialize-project.ts';
+import { readResource, resources } from './resources/index.ts';
 
 // Check if debug mode is enabled
 const DEBUG_MODE: boolean = process.env.DEBUG === 'true';
@@ -151,6 +155,7 @@ export class GodotServer {
       {
         capabilities: {
           tools: {},
+          resources: {},
         },
       }
     );
@@ -682,6 +687,7 @@ export class GodotServer {
       save_scene,
       get_uid,
       update_project_uids,
+      initialize_project,
     ];
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: tools.map(tool => tool.definition),
@@ -694,6 +700,18 @@ export class GodotServer {
         throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${request.params.name}`);
       }
       return tool.handle.call(this, request.params.arguments);
+    });
+
+    this.server.setRequestHandler(ListResourcesRequestSchema, async () => ({
+      resources,
+    }));
+
+    this.server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+      const result = readResource(request.params.uri);
+      if (!result) {
+        throw new McpError(ErrorCode.InvalidRequest, `Unknown resource: ${request.params.uri}`);
+      }
+      return result;
     });
   }
 
