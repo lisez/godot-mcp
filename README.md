@@ -76,6 +76,79 @@ Add this server configuration to your MCP client's settings:
 | `export_mesh_library` | Export a 3D scene as a `MeshLibrary` |
 | `get_uid` | Get a file's Godot UID |
 | `update_project_uids` | Update UIDs in a project |
+| `initialize_project` | Create a directory with a `project.godot` file |
+| `inspect_model_3d` | Inspect imported transforms and measure between two 3D node origins |
+| `run_tests` | Run a native Godot test script headlessly and report failing source lines |
+| `replay_input` | Replay multi-finger touch events and capture positions or screenshots by physics frame |
+| `export_project` | Build an export preset and verify its artifact and APK signature |
+| `test_android_foldable` | Observe an installed APK through a sequence of emulator posture changes |
+
+### Inspect a model and run tests
+
+Call `inspect_model_3d` with a Godot 4 project and a project-relative `.glb` or `.tscn`. Model inspection and scene replay first run the Godot editor’s headless import step so a fresh checkout can load its resources. Omit the two endpoints to discover their paths. Every node has a path and parent, and each 3D node has its local and model-root transforms. For example, measure from the model root to a child node. Replace the paths with paths from your project.
+
+```json
+{
+  "projectPath": "/path/to/project",
+  "modelPath": "assets/model.glb",
+  "fromNode": ".",
+  "toNode": "Marker"
+}
+```
+
+The returned displacement, distance and unit direction are in model-root coordinates. Coincident origins yield a distance of zero and a null direction.
+
+Call `run_tests` with a test script from your project.
+
+```json
+{
+  "projectPath": "/path/to/project",
+  "scriptPath": "tests/test.gd",
+  "timeoutMs": 60000
+}
+```
+
+Supply a native GDScript entry point runnable with Godot's `--script`, such as a script extending `SceneTree` that calls `quit()` when finished. Import the project's dependencies first. Results include `passed`, `failed` or `timed_out`, the exit code, duration, output and diagnostics with source locations when available. A reported Godot assertion fails the run even on exit code zero. The default deadline is 60 seconds.
+
+### Replay touch input
+
+For `replay_input`, supply a scene, a seed for Godot's global random number generator, and the input and capture schedules. Frame zero is the first scheduled physics tick. Coordinates are in viewport pixels. Events within a frame are delivered in list order, and each drag or release refers to a previously pressed finger.
+
+```json
+{
+  "projectPath": "/path/to/project",
+  "scenePath": "main.tscn",
+  "seed": 42,
+  "events": [
+    {"frame": 0, "fingerId": 0, "type": "press", "x": 40, "y": 180},
+    {"frame": 1, "fingerId": 0, "type": "drag", "x": 70, "y": 180},
+    {"frame": 1, "fingerId": 1, "type": "press", "x": 270, "y": 180},
+    {"frame": 2, "fingerId": 1, "type": "release", "x": 270, "y": 180},
+    {"frame": 3, "fingerId": 0, "type": "release", "x": 70, "y": 180}
+  ],
+  "captures": [{"frame": 2, "nodePaths": ["Player"], "screenshot": true}]
+}
+```
+
+Node paths are relative to the scene root. Captures report global 2D or 3D positions after the physics update. Screenshots require a working display and renderer and arrive as MCP PNG image content, indexed from the capture record. Position-only runs work headlessly.
+
+### Export and exercise a foldable APK
+
+Call `export_project` with the exact preset name from `export_presets.cfg`, a `debug` or `release` mode and an absolute or project-relative output filename.
+
+```json
+{"projectPath":"/path/to/project","preset":"Android","mode":"debug","outputPath":"build/game.apk"}
+```
+
+Install the engine's matching export templates or configure the preset's custom templates. For Android, configure the JDK and Android SDK in Godot and make Android SDK Build Tools available for signature verification. The report includes build checks and the published artifact path on success. A failed build or signature check preserves the previous artifact.
+
+With a running foldable Android emulator, call `test_android_foldable`.
+
+```json
+{"apkPath":"/path/to/project/build/game.apk","emulatorSerial":"emulator-5554","states":["folded","unfolded"]}
+```
+
+The host needs `adb` and `aapt` from Android SDK Platform Tools and Build Tools. Set `ANDROID_HOME` to the SDK or put the executables on `PATH`. Use an emulator supporting the fold and unfold commands and device-state reporting. The tool installs the APK, launches its Activity once, and waits for a stable posture and focused app window at each step. Each step includes a PNG, window bounds, observed lifecycle events and app logs. Hinge geometry includes its coordinate space and source when available, or a reason it could not be observed. An application can log state identifiers for its own continuity checks.
 
 ## Configuration
 
@@ -100,6 +173,8 @@ The server runs compiled JavaScript. `npm ci` builds it automatically; after mak
 npm test
 npm run typecheck
 ```
+
+Set `GODOT_TEST_BIN` to a Godot 4 editor executable to include native engine integration tests. Set `GODOT_REPLAY_SCREENSHOT_TEST=1` on a host with a working display to exercise PNG capture as well.
 
 The project is implemented in TypeScript under `src/`. Complex scene and resource operations are handled by `src/scripts/godot-operations.gd`.
 

@@ -92,7 +92,8 @@ test('all tools are registered and routed to their handlers', async () => {
     'launch_editor', 'run_project', 'get_debug_output', 'stop_project',
     'get_godot_version', 'list_projects', 'get_project_info', 'create_scene',
     'add_node', 'load_sprite', 'export_mesh_library', 'save_scene', 'get_uid',
-    'update_project_uids', 'initialize_project',
+    'update_project_uids', 'initialize_project', 'inspect_model_3d', 'run_tests',
+    'replay_input', 'export_project', 'test_android_foldable',
   ];
 
   await withServer(async (client) => {

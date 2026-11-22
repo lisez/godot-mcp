@@ -37,6 +37,11 @@ import * as save_scene from './tools/save-scene.ts';
 import * as get_uid from './tools/get-uid.ts';
 import * as update_project_uids from './tools/update-project-uids.ts';
 import * as initialize_project from './tools/initialize-project.ts';
+import * as inspect_model_3d from './tools/inspect-model-3d.ts';
+import * as run_tests from './tools/run-tests.ts';
+import * as replay_input from './tools/replay-input.ts';
+import * as export_project from './tools/export-project.ts';
+import * as test_android_foldable from './tools/test-android-foldable.ts';
 import { readResource, resources } from './resources/index.ts';
 
 // Check if debug mode is enabled
@@ -100,6 +105,13 @@ export class GodotServer {
     'directory': 'directory',
     'recursive': 'recursive',
     'scene': 'scene',
+    'model_path': 'modelPath',
+    'from_node': 'fromNode',
+    'to_node': 'toNode',
+    'script_path': 'scriptPath',
+    'timeout_ms': 'timeoutMs',
+    'apk_path': 'apkPath',
+    'emulator_serial': 'emulatorSerial',
   };
 
   /**
@@ -688,6 +700,11 @@ export class GodotServer {
       get_uid,
       update_project_uids,
       initialize_project,
+      inspect_model_3d,
+      run_tests,
+      replay_input,
+      export_project,
+      test_android_foldable,
     ];
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: tools.map(tool => tool.definition),
