@@ -53,6 +53,15 @@ import { readResource, resources } from './resources/index.ts';
 // Check if debug mode is enabled
 const DEBUG_MODE: boolean = process.env.DEBUG === 'true';
 const GODOT_DEBUG_MODE: boolean = true; // Always use GODOT DEBUG MODE
+const OPERATION_SCRIPTS = {
+  create_scene: 'create-scene.gd',
+  add_node: 'add-node.gd',
+  load_sprite: 'load-sprite.gd',
+  export_mesh_library: 'export-mesh-library.gd',
+  save_scene: 'save-scene.gd',
+  get_uid: 'get-uid.gd',
+  resave_resources: 'resave-resources.gd',
+} as const;
 
 /**
  * Interface representing a running Godot process
@@ -87,7 +96,6 @@ export class GodotServer {
   private server: Server;
   activeProcess: GodotProcess | null = null;
   godotPath: string | null = null;
-  private operationsScriptPath: string;
   private validatedPaths: Map<string, boolean> = new Map();
   private strictPathValidation: boolean = false;
 
@@ -166,10 +174,6 @@ export class GodotServer {
         }
       }
     }
-
-    // Set the path to the operations script
-    this.operationsScriptPath = join(import.meta.dirname, 'scripts', 'godot-operations.gd');
-    if (debugMode) console.error(`[DEBUG] Operations script path: ${this.operationsScriptPath}`);
 
     // Initialize the MCP server
     this.server = new Server(
@@ -512,14 +516,14 @@ export class GodotServer {
   }
 
   /**
-   * Execute a Godot operation using the operations script
+   * Execute a Godot operation using its dedicated script
    * @param operation The operation to execute
    * @param params The parameters for the operation
    * @param projectPath The path to the Godot project
    * @returns The stdout and stderr from the operation
    */
   async executeOperation(
-    operation: string,
+    operation: keyof typeof OPERATION_SCRIPTS,
     params: OperationParams,
     projectPath: string
   ): Promise<{ stdout: string; stderr: string }> {
@@ -542,6 +546,14 @@ export class GodotServer {
     try {
       // Serialize the snake_case parameters to a valid JSON string
       const paramsJson = JSON.stringify(snakeCaseParams);
+      const scriptPath = join(import.meta.dirname, 'scripts', OPERATION_SCRIPTS[operation]);
+      if (!existsSync(scriptPath)) {
+        throw new Error(`Godot operation script not found: ${scriptPath}`);
+      }
+      const commonScriptPath = join(import.meta.dirname, 'scripts', 'operation-common.gd');
+      if (!existsSync(commonScriptPath)) {
+        throw new Error(`Godot operation shared script not found: ${commonScriptPath}`);
+      }
 
       // Build argument array for execFile to prevent command injection
       // Using execFile with argument arrays avoids shell interpretation entirely
@@ -550,8 +562,7 @@ export class GodotServer {
         '--path',
         projectPath,  // Safe: passed as argument, not interpolated into shell command
         '--script',
-        this.operationsScriptPath,
-        operation,
+        scriptPath,
         paramsJson,  // Safe: passed as argument, not interpreted by shell
       ];
 

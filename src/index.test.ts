@@ -163,7 +163,7 @@ test('initialize_project creates project.godot without overwriting existing cont
   }
 });
 
-test('tool modules share process state and use the bundled operations script', {
+test('tool modules share process state and use bundled operation scripts', {
   skip: process.platform === 'win32',
 }, async () => {
   const root = await mkdtemp(join(tmpdir(), 'godot-mcp-tools-'));
@@ -172,7 +172,9 @@ test('tool modules share process state and use the bundled operations script', {
     const manifest = JSON.parse(await readFile('package.json', 'utf8'));
     await cp('package.json', join(packageRoot, 'package.json'));
     await cp('dist', join(packageRoot, 'dist'), { recursive: true });
-    for (const script of await readdir('src/scripts')) {
+    const scripts = await readdir('src/scripts');
+    assert.deepEqual((await readdir(join(packageRoot, 'dist', 'scripts'))).sort(), scripts.sort());
+    for (const script of scripts) {
       assert.deepEqual(await readFile(join(packageRoot, 'dist', 'scripts', script)), await readFile(join('src/scripts', script)));
     }
     const packagedServerPath = join(packageRoot, manifest.bin['godot-mcp']);
@@ -190,20 +192,49 @@ if (args.includes('--version')) {
 }
 `, { mode: 0o755 });
     await writeFile(join(root, 'project.godot'), '[application]\n', 'utf8');
+    await writeFile(join(root, 'test.tscn'), '[gd_scene format=3]\n', 'utf8');
+    await writeFile(join(root, 'texture.png'), '', 'utf8');
+    await writeFile(join(root, 'script.gd'), 'extends Node\n', 'utf8');
 
     await withServer(async (client) => {
-      const created = await client.callTool({
+      const operations = [
+        { name: 'create_scene', script: 'create-scene.gd', arguments: { scene_path: 'test.tscn' }, params: { scene_path: 'test.tscn', root_node_type: 'Node2D' } },
+        { name: 'add_node', script: 'add-node.gd', arguments: { scene_path: 'test.tscn', node_type: 'Node2D', node_name: 'Child' }, params: { scene_path: 'test.tscn', node_type: 'Node2D', node_name: 'Child' } },
+        { name: 'load_sprite', script: 'load-sprite.gd', arguments: { scene_path: 'test.tscn', node_path: 'root/Sprite', texture_path: 'texture.png' }, params: { scene_path: 'test.tscn', node_path: 'root/Sprite', texture_path: 'texture.png' } },
+        { name: 'export_mesh_library', script: 'export-mesh-library.gd', arguments: { scene_path: 'test.tscn', output_path: 'meshes.res' }, params: { scene_path: 'test.tscn', output_path: 'meshes.res' } },
+        { name: 'save_scene', script: 'save-scene.gd', arguments: { scene_path: 'test.tscn', new_path: 'copy.tscn' }, params: { scene_path: 'test.tscn', new_path: 'copy.tscn' } },
+        { name: 'get_uid', script: 'get-uid.gd', arguments: { file_path: 'script.gd' }, params: { file_path: 'script.gd' } },
+        { name: 'update_project_uids', script: 'resave-resources.gd', arguments: {}, params: { project_path: 'res://' } },
+      ];
+      for (const operation of operations) {
+        const result = await client.callTool({
+          name: operation.name,
+          arguments: { project_path: root, ...operation.arguments },
+        });
+        assert.notEqual(result.isError, true, operation.name);
+        const text = firstText(result);
+        const args = JSON.parse(text.slice(text.indexOf('["--headless"')));
+        const scriptIndex = args.indexOf('--script');
+        assert.equal(args[scriptIndex + 1], join(packageRoot, 'dist', 'scripts', operation.script));
+        assert.deepEqual(JSON.parse(args[scriptIndex + 2]), operation.params);
+        assert.equal(args[scriptIndex + 3], '--debug-godot');
+      }
+
+      await rm(join(packageRoot, 'dist', 'scripts', 'save-scene.gd'));
+      const missingScript = await client.callTool({
+        name: 'save_scene',
+        arguments: { projectPath: root, scenePath: 'test.tscn' },
+      });
+      assert.equal(missingScript.isError, true);
+      assert.match(firstText(missingScript), /operation script not found/);
+
+      await rm(join(packageRoot, 'dist', 'scripts', 'operation-common.gd'));
+      const missingCommon = await client.callTool({
         name: 'create_scene',
-        arguments: { project_path: root, scene_path: 'test.tscn' },
+        arguments: { projectPath: root, scenePath: 'another.tscn' },
       });
-      assert.notEqual(created.isError, true);
-      const args = JSON.parse(firstText(created).split('\n\nOutput: ')[1]);
-      assert.equal(args[args.indexOf('--script') + 1], join(packageRoot, 'dist', 'scripts', 'godot-operations.gd'));
-      assert.equal(args[args.indexOf('--script') + 2], 'create_scene');
-      assert.deepEqual(JSON.parse(args[args.indexOf('--script') + 3]), {
-        scene_path: 'test.tscn',
-        root_node_type: 'Node2D',
-      });
+      assert.equal(missingCommon.isError, true);
+      assert.match(firstText(missingCommon), /operation shared script not found/);
 
       const started = await client.callTool({ name: 'run_project', arguments: { projectPath: root } });
       assert.notEqual(started.isError, true);

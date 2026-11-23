@@ -28,7 +28,7 @@
     "!dist/**/*.test.js"
   ],
   "scripts": {
-    "build": "tsc --noEmit false --outDir dist && node -e \"require('node:fs').cpSync('src/scripts', 'dist/scripts', { recursive: true })\"",
+    "build": "tsc --noEmit false --outDir dist && node -e \"const fs = require('node:fs'); fs.rmSync('dist/scripts', { recursive: true, force: true }); fs.cpSync('src/scripts', 'dist/scripts', { recursive: true })\"",
     "prepare": "npm run build",
     "pretest": "npm run build",
     "test": "node --test src/*.test.ts src/tools/*.test.ts",

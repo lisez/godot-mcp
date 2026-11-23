@@ -230,7 +230,7 @@ npm run typecheck
 
 Set `GODOT_TEST_BIN` to a Godot 4 editor executable to include native engine integration tests. Set `GODOT_REPLAY_SCREENSHOT_TEST=1` on a host with a working display to exercise PNG capture as well.
 
-The project is implemented in TypeScript under `src/`. Complex scene and resource operations are handled by `src/scripts/godot-operations.gd`.
+The project is implemented in TypeScript under `src/`. Godot operations use dedicated GDScript helpers under `src/scripts/`.
 
 ## Troubleshooting
 
