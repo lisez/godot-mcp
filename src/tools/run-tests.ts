@@ -24,7 +24,7 @@ interface Diagnostic {
   stack: string[];
 }
 
-function diagnostics(output: string): Diagnostic[] {
+export function diagnostics(output: string): Diagnostic[] {
   const result: Diagnostic[] = [];
   let current: Diagnostic | undefined;
   for (const line of stripVTControlCharacters(output).split(/\r?\n/)) {
@@ -46,6 +46,19 @@ function diagnostics(output: string): Diagnostic[] {
   return result;
 }
 
+export async function runTestScript(godot: string, root: string, script: string, timeoutMs: number) {
+  const start = performance.now();
+  const { stdout, stderr, timedOut, exitCode } = await runCommand(
+    godot, ['--headless', '--path', root, '--script', script], { timeoutMs }
+  );
+  const errors = [...diagnostics(stdout), ...diagnostics(stderr)];
+  const status = timedOut ? 'timed_out' : exitCode !== 0 || errors.length ? 'failed' : 'passed';
+  return {
+    status, exitCode, durationMs: Math.round(performance.now() - start),
+    diagnostics: errors, stdout, stderr,
+  };
+}
+
 export async function handle(this: GodotServer, raw: any) {
   try {
     const { projectPath, scriptPath, timeoutMs = 60_000 } = this.normalizeParameters(raw ?? {});
@@ -53,16 +66,8 @@ export async function handle(this: GodotServer, raw: any) {
     const script = await projectFile(root, scriptPath);
     if (!/\.gd$/i.test(script)) throw new Error('scriptPath must refer to a GDScript (.gd) file.');
     const godot = await requireGodot(this);
-    const start = performance.now();
-    const { stdout, stderr, timedOut, exitCode } = await runCommand(
-      godot, ['--headless', '--path', root, '--script', script], { timeoutMs }
-    );
-    const errors = [...diagnostics(stdout), ...diagnostics(stderr)];
-    const status = timedOut ? 'timed_out' : exitCode !== 0 || errors.length ? 'failed' : 'passed';
-    return jsonResult({
-      status, exitCode, durationMs: Math.round(performance.now() - start),
-      diagnostics: errors, stdout, stderr,
-    }, status !== 'passed');
+    const result = await runTestScript(godot, root, script, timeoutMs);
+    return jsonResult(result, result.status !== 'passed');
   } catch (error) {
     return this.createErrorResponse(error instanceof Error ? error.message : String(error));
   }

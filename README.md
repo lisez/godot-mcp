@@ -79,7 +79,13 @@ Add this server configuration to your MCP client's settings:
 | `initialize_project` | Create a directory with a `project.godot` file |
 | `inspect_model_3d` | Inspect imported transforms and measure between two 3D node origins |
 | `run_tests` | Run a native Godot test script headlessly and report failing source lines |
-| `replay_input` | Replay multi-finger touch events and capture positions or screenshots by physics frame |
+| `validate_project` | Check project import and GDScript parsing, and run discovered standalone test scripts |
+| `edit_resource` | Preview or apply typed property changes to one external or embedded resource |
+| `inspect_scene` | Inspect a scene's serialized nodes, properties, connections and resource references |
+| `edit_scene` | Preview or apply a batch of offline scene edits |
+| `preview_scene` | Run a scene and capture a specified viewport frame |
+| `check_export_readiness` | Check export prerequisites without building an artifact |
+| `replay_input` | Replay touch, keyboard, mouse and gamepad events with frame captures and assertions |
 | `export_project` | Build an export preset and verify its artifact and APK signature |
 | `test_android_foldable` | Observe an installed APK through a sequence of emulator posture changes |
 
@@ -110,7 +116,41 @@ Call `run_tests` with a test script from your project.
 
 Supply a native GDScript entry point runnable with Godot's `--script`, such as a script extending `SceneTree` that calls `quit()` when finished. Import the project's dependencies first. Results include `passed`, `failed` or `timed_out`, the exit code, duration, output and diagnostics with source locations when available. A reported Godot assertion fails the run even on exit code zero. The default deadline is 60 seconds.
 
-### Replay touch input
+`validate_project` runs project import and GDScript checks before executing discovered tests. Candidates are files whose names contain `.test.` or are under a `test` or `tests` directory. Only `.gd` files with a recognizable direct `extends SceneTree` or `extends MainLoop` declaration are run automatically; other candidates are reported as skipped. `.godot`, `.git`, directories containing `.gdignore`, symlinks, and Godot `.uid` and `.import` metadata are excluded. Pass `testPaths` to include additional project-relative GDScript entry points. Tests run project code and can have side effects. An incomplete test selection, absent tests, or an unverified extension yields an inconclusive result rather than a pass.
+
+```json
+{"projectPath":"/path/to/project","testPaths":["tools/run_checks.gd"],"timeoutMs":60000}
+```
+
+### Edit a resource
+
+`edit_resource` defaults to preview and returns typed before/after values and a fingerprint. Supply `mode: "apply"` to write the change, and optionally pass the preview's `expectedOriginalFingerprint` to reject a stale preview. External `.tres` resources require `ownership: "external_shared"` and `allowSharedResource: true`; changes may affect every scene using that resource. Embedded resources require a `.tscn` and `ownership: "embedded"` with its exact `subresourceId`.
+
+```json
+{"projectPath":"/path/to/project","resourcePath":"materials/ground.tres","ownership":"external_shared","allowSharedResource":true,"changes":[{"property":"roughness","value":{"type":"float","value":0.5}}]}
+```
+
+Edits are offline and cannot use the editor's undo stack. An open editor may have unsaved changes; multi-file edits and writes racing after the final fingerprint check are not protected.
+
+### Inspect, edit and preview a scene
+
+`inspect_scene` reports the file-local serialized scene, not dynamically created runtime nodes or every default property. Use its paths with `edit_scene`, which previews by default:
+
+```json
+{"projectPath":"/path/to/project","scenePath":"menu.tscn","operations":[{"type":"set_property","nodePath":"Menu","property":"position","value":{"type":"Vector2","value":[20,30]}}]}
+```
+
+Set `mode` to `apply` to save a validated batch. Supply the returned `expectedOriginalFingerprint` when applying to reject a stale preview. Edits are offline, not part of editor Undo, and cannot protect changes made after the final fingerprint check.
+
+Use `preview_scene` to run a fresh process and capture the requested frame:
+
+```json
+{"projectPath":"/path/to/project","scenePath":"menu.tscn","width":1280,"height":720,"captureFrame":1}
+```
+
+Repeat with a narrow width and height to inspect another layout. `captureFrame` is zero-based: frame 0 is the first process/physics update after the scene is installed. Preview requires a graphical renderer and executes project code, including autoloads; project initialization can have side effects.
+
+### Replay input
 
 For `replay_input`, supply a scene, a seed for Godot's global random number generator, and the input and capture schedules. Frame zero is the first scheduled physics tick. Coordinates are in viewport pixels. Events within a frame are delivered in list order, and each drag or release refers to a previously pressed finger.
 
@@ -130,7 +170,15 @@ For `replay_input`, supply a scene, a seed for Godot's global random number gene
 }
 ```
 
-Node paths are relative to the scene root. Captures report global 2D or 3D positions after the physics update. Screenshots require a working display and renderer and arrive as MCP PNG image content, indexed from the capture record. Position-only runs work headlessly.
+Node paths are relative to the scene root. Captures report global 2D or 3D positions after the physics update. Screenshots require a working display and renderer and arrive as MCP PNG image content, indexed from the capture record. During screenshot rendering, node processing is temporarily paused to preserve frame order; timers or direct signal callbacks may still affect the scene. Position-only runs work headlessly.
+
+Replay also accepts `key`, `mouse_button`, `mouse_motion`, `joypad_button`, and `joypad_axis` events. For example, add `{"frame":0,"type":"key","keycode":65,"pressed":true}` and its release in a later frame. These are synthetic Godot input events, not hardware devices. Optional `assertions` are evaluated after physics:
+
+```json
+{"frame":2,"nodePath":"Player","property":"position","operator":"approximately","expected":[10,20],"tolerance":0.1}
+```
+
+Assertions report their frame, expected and actual values; a mismatch sets `status` to `failed` and the MCP result to an error. Supported comparisons include equality, inequality, numeric ordering, and approximate numeric or vector equality. A fixed seed does not guarantee deterministic project behavior.
 
 ### Export and exercise a foldable APK
 
@@ -141,6 +189,12 @@ Call `export_project` with the exact preset name from `export_presets.cfg`, a `d
 ```
 
 Install the engine's matching export templates or configure the preset's custom templates. For Android, configure the JDK and Android SDK in Godot and make Android SDK Build Tools available for signature verification. The report includes build checks and the published artifact path on success. A failed build or signature check preserves the previous artifact.
+
+Before building, call `check_export_readiness` with the project, exact preset and `debug` or `release` mode. It reports known missing prerequisites and separately marks checks that cannot establish compatibility as unknown; it does not build or publish an artifact.
+
+```json
+{"projectPath":"/path/to/project","preset":"Android","mode":"debug"}
+```
 
 With a running foldable Android emulator, call `test_android_foldable`.
 

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { cp, mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import { test } from 'node:test';
@@ -92,7 +92,8 @@ test('all tools are registered and routed to their handlers', async () => {
     'launch_editor', 'run_project', 'get_debug_output', 'stop_project',
     'get_godot_version', 'list_projects', 'get_project_info', 'create_scene',
     'add_node', 'load_sprite', 'export_mesh_library', 'save_scene', 'get_uid',
-    'update_project_uids', 'initialize_project', 'inspect_model_3d', 'run_tests',
+    'update_project_uids', 'initialize_project', 'inspect_model_3d', 'run_tests', 'validate_project', 'edit_resource',
+    'inspect_scene', 'edit_scene', 'preview_scene', 'check_export_readiness',
     'replay_input', 'export_project', 'test_android_foldable',
   ];
 
@@ -171,6 +172,9 @@ test('tool modules share process state and use the bundled operations script', {
     const manifest = JSON.parse(await readFile('package.json', 'utf8'));
     await cp('package.json', join(packageRoot, 'package.json'));
     await cp('dist', join(packageRoot, 'dist'), { recursive: true });
+    for (const script of await readdir('src/scripts')) {
+      assert.deepEqual(await readFile(join(packageRoot, 'dist', 'scripts', script)), await readFile(join('src/scripts', script)));
+    }
     const packagedServerPath = join(packageRoot, manifest.bin['godot-mcp']);
     const godotPath = join(root, 'godot.mjs');
     await writeFile(godotPath, `#!${process.execPath}

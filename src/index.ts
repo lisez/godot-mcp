@@ -39,6 +39,12 @@ import * as update_project_uids from './tools/update-project-uids.ts';
 import * as initialize_project from './tools/initialize-project.ts';
 import * as inspect_model_3d from './tools/inspect-model-3d.ts';
 import * as run_tests from './tools/run-tests.ts';
+import * as validate_project from './tools/validate-project.ts';
+import * as edit_resource from './tools/edit-resource.ts';
+import * as inspect_scene from './tools/inspect-scene.ts';
+import * as edit_scene from './tools/edit-scene.ts';
+import * as preview_scene from './tools/preview-scene.ts';
+import * as check_export_readiness from './tools/check-export-readiness.ts';
 import * as replay_input from './tools/replay-input.ts';
 import * as export_project from './tools/export-project.ts';
 import * as test_android_foldable from './tools/test-android-foldable.ts';
@@ -110,6 +116,13 @@ export class GodotServer {
     'to_node': 'toNode',
     'script_path': 'scriptPath',
     'timeout_ms': 'timeoutMs',
+    'test_paths': 'testPaths',
+    'resource_path': 'resourcePath',
+    'subresource_id': 'subresourceId',
+    'allow_shared_resource': 'allowSharedResource',
+    'expected_original_fingerprint': 'expectedOriginalFingerprint',
+    'preview_entry_scene': 'previewEntryScene',
+    'capture_frame': 'captureFrame',
     'apk_path': 'apkPath',
     'emulator_serial': 'emulatorSerial',
   };
@@ -702,6 +715,12 @@ export class GodotServer {
       initialize_project,
       inspect_model_3d,
       run_tests,
+      validate_project,
+      edit_resource,
+      inspect_scene,
+      edit_scene,
+      preview_scene,
+      check_export_readiness,
       replay_input,
       export_project,
       test_android_foldable,

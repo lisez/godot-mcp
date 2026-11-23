@@ -72,7 +72,7 @@ test('run_tests retains the failing GDScript location after Godot exits zero', {
   const { exitCode, status, diagnostics } = result.structuredContent;
   assert.equal(exitCode, 0);
   assert.equal(status, 'failed');
-  assert.equal(diagnostics[0].file, 'res://assertion.gd');
+  assert.equal(diagnostics[0].file, 'res://assertion.gd', JSON.stringify(result.structuredContent));
   assert.equal(diagnostics[0].line, 6);
   assert.match(diagnostics[0].message, /direction mismatch/);
 });
